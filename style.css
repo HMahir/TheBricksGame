@@ -1,0 +1,9 @@
+#canvas {
+    background: lightcoral;
+}
+
+.canvasPosition {
+    margin-top: 100px;
+    display: flex;
+    justify-content: center;
+}
