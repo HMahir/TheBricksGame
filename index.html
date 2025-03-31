@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brick Breaker Game</title>
+    <style>
+        body {
+            text-align: center;
+            background-color: #1e1e1e;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        #gameContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        canvas {
+            background: #222;
+            border: 3px solid white;
+        }
+        #controls {
+            margin-top: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+        #startButton { background-color: green; color: white; }
+        #startButton:hover { background-color: darkgreen; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+
+<div id="gameContainer">
+    <canvas id="myCanvas" width="600" height="400"></canvas>
+    <div id="controls">
+        <button id="startButton">Start Game</button>
+    </div>
+</div>
+
+<script>
+    var canvas = document.getElementById("myCanvas");
+    var ctx = canvas.getContext("2d");
+    var gameStarted = false;
+    
+    var x = canvas.width / 2;
+    var y = canvas.height - 30;
+    var dx = 3;
+    var dy = -3;
+    var ballRadius = 10;
+    
+    var paddleHeight = 10;
+    var paddleWidth = 100;
+    var paddleX = (canvas.width - paddleWidth) / 2;
+    
+    var rightPressed = false;
+    var leftPressed = false;
+    
+    var brickRowCount = 4;
+    var brickColumnCount = 7;
+    var brickWidth = 70;  
+    var brickHeight = 20;
+    var brickPadding = 10;
+    var brickOffsetTop = 50;
+    var brickOffsetLeft = (canvas.width - (brickColumnCount * (brickWidth + brickPadding) - brickPadding)) / 2;
+    
+    var score = 0;
+    var bricks = [];
+
+    // Initialize bricks with random colors
+    function getRandomColor() {
+        return "#" + Math.floor(Math.random() * 16777215).toString(16);
+    }
+
+    for (var c = 0; c < brickColumnCount; c++) {
+        bricks[c] = [];
+        for (var r = 0; r < brickRowCount; r++) {
+            bricks[c][r] = { 
+                x: c * (brickWidth + brickPadding) + brickOffsetLeft, 
+                y: r * (brickHeight + brickPadding) + brickOffsetTop, 
+                status: 1,
+                color: getRandomColor() // Assigning random color to each brick
+            };
+        }
+    }
+
+    function drawBall() {
+        ctx.beginPath();
+        ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
+        ctx.fillStyle = "#0095DD";
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    function drawPaddle() {
+        ctx.beginPath();
+        ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
+        ctx.fillStyle = "#0095DD";
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    function drawBricks() {
+        for (var c = 0; c < brickColumnCount; c++) {
+            for (var r = 0; r < brickRowCount; r++) {
+                var b = bricks[c][r];
+                if (b.status === 1) {
+                    ctx.fillStyle = b.color; // Use brick's color
+                    ctx.fillRect(b.x, b.y, brickWidth, brickHeight);
+                }
+            }
+        }
+    }
+
+    function collisionDetection() {
+        for (var c = 0; c < brickColumnCount; c++) {
+            for (var r = 0; r < brickRowCount; r++) {
+                var b = bricks[c][r];
+                if (b.status === 1) {
+                    if (x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
+                        dy = -dy;
+                        b.status = 0; // Brick is destroyed
+                        score++;
+                        b.color = getRandomColor(); // Change color of the brick after it's hit
+                        checkWin();
+                    }
+                }
+            }
+        }
+    }
+
+    function checkWin() {
+        var allBricksCleared = true;
+        for (var c = 0; c < brickColumnCount; c++) {
+            for (var r = 0; r < brickRowCount; r++) {
+                if (bricks[c][r].status === 1) {
+                    allBricksCleared = false;
+                    break;
+                }
+            }
+        }
+        if (allBricksCleared) {
+            gameStarted = false;
+            Swal.fire({
+                title: "Well Done!",
+                text: "You cleared all the bricks!",
+                icon: "success",
+                confirmButtonText: "Play Again"
+            }).then(() => {
+                document.location.reload();
+            });
+        }
+    }
+
+    function gameOver() {
+        gameStarted = false;
+        Swal.fire({
+            title: "You Failed!",
+            text: "Better luck next time!",
+            icon: "error",
+            confirmButtonText: "Retry"
+        }).then(() => {
+            document.location.reload();
+        });
+    }
+
+    function draw() {
+        if (!gameStarted) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawBricks();
+        drawBall();
+        drawPaddle();
+        collisionDetection();
+
+        if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) dx = -dx;
+        if (y + dy < ballRadius) dy = -dy;
+        else if (y + dy > canvas.height - ballRadius) {
+            if (x > paddleX && x < paddleX + paddleWidth) dy = -dy;
+            else gameOver();  // Trigger SweetAlert when the ball is missed
+        }
+
+        if (rightPressed && paddleX < canvas.width - paddleWidth) paddleX += 7;
+        if (leftPressed && paddleX > 0) paddleX -= 7;
+
+        x += dx;
+        y += dy;
+        requestAnimationFrame(draw);
+    }
+
+    document.getElementById("startButton").addEventListener("click", function() {
+        gameStarted = true;
+        draw();
+    });
+
+    document.addEventListener("keydown", function(e) {
+        if (e.key === "ArrowRight") rightPressed = true;
+        else if (e.key === "ArrowLeft") leftPressed = true;
+    });
+
+    document.addEventListener("keyup", function(e) {
+        if (e.key === "ArrowRight") rightPressed = false;
+        else if (e.key === "ArrowLeft") leftPressed = false;
+    });
+</script>
+
+</body>
+</html>
