@@ -91,6 +91,7 @@
         var bricks = [];
         var particles = []; // Store particles
         var ballColor = "#0095DD";
+
         function getRandomColor() {
             return "#" + Math.floor(Math.random() * 16777215).toString(16);
         }
@@ -139,6 +140,13 @@
             }
         }
 
+        // Create particles when the ball hits the paddle
+        function createPaddleParticles(x, y, color) {
+            for (let i = 0; i < 15; i++) { // Generate 15 particles for the paddle
+                particles.push(new Particle(x, y, color));
+            }
+        }
+
         function drawParticles() {
             for (let i = particles.length - 1; i >= 0; i--) {
                 particles[i].update();
@@ -148,6 +156,7 @@
                 }
             }
         }
+
         function drawBall() {
             ctx.beginPath();
             ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
@@ -155,7 +164,6 @@
             ctx.fill();
             ctx.closePath();
         }
-
 
         function drawPaddle() {
             ctx.beginPath();
@@ -196,32 +204,37 @@
             }
         }
 
-        // Modify collision detection for explosive effect
         function collisionDetection() {
-    for (var c = 0; c < brickColumnCount; c++) {
-        for (var r = 0; r < brickRowCount; r++) {
-            var b = bricks[c][r];
-            if (b.status === 1) {
-                if (x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
-                    dy = -dy;
-                    ballColor = b.color; // Change ball color to the brick color
-                    b.status = 0;
-                    score++;
-                    createParticles(b.x, b.y, b.color);
+            for (var c = 0; c < brickColumnCount; c++) {
+                for (var r = 0; r < brickRowCount; r++) {
+                    var b = bricks[c][r];
+                    if (b.status === 1) {
+                        if (x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
+                            dy = -dy;
+                            ballColor = b.color; // Change ball color to the brick color
+                            b.status = 0;
+                            score++;
+                            createParticles(b.x, b.y, b.color);
 
-                    if (b.isExplosive) {
-                        destroyNearbyBricks(c, r);
+                            if (b.isExplosive) {
+                                destroyNearbyBricks(c, r);
+                            }
+
+                            checkWin();
+                        }
                     }
+                }
+            }
 
-                    checkWin();
+            // Ball-paddle collision with particle effect
+            if (x > paddleX && x < paddleX + paddleWidth && y + dy > canvas.height - ballRadius) {
+                if (y + dy < canvas.height - paddleHeight) {
+                    dy = -dy;
+                    createPaddleParticles(x, y, "#0095DD"); // Generate particles on paddle hit
                 }
             }
         }
-    }
-}
 
-
-        // Function to destroy nearby bricks around the explosive brick
         function destroyNearbyBricks(col, row) {
             for (var dc = -1; dc <= 1; dc++) {
                 for (var dr = -1; dr <= 1; dr++) {
@@ -250,10 +263,10 @@
             if (allBricksCleared) {
                 gameStarted = false;
                 Swal.fire({
-                    title: "Well Done!",
-                    text: "You cleared all the bricks!",
+                    title: "Super ",
+                    text: "Zmagal si",
                     icon: "success",
-                    confirmButtonText: "Play Again"
+                    confirmButtonText: "Igraj ponovno"
                 }).then(() => {
                     document.location.reload();
                 });
@@ -263,10 +276,10 @@
         function gameOver() {
             gameStarted = false;
             Swal.fire({
-                title: "Game Over!",
-                text: "Try again!",
+                title: "Napaka!",
+                text: "Poskusi spet!",
                 icon: "error",
-                confirmButtonText: "Retry"
+                confirmButtonText: "Ponovi"
             }).then(() => {
                 document.location.reload();
             });
@@ -274,7 +287,10 @@
 
         function draw() {
             if (!gameStarted) return;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = "rgba(34, 34, 34,0.4)";  
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
             drawBricks();
             drawParticles();
             drawBall();
@@ -284,16 +300,17 @@
             if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) dx = -dx;
             if (y + dy < ballRadius) dy = -dy;
             else if (y + dy > canvas.height - ballRadius) {
-                if (x > paddleX && x < paddleX + paddleWidth) dy = -dy;
-                else gameOver();
+                if (x > paddleX && x < paddleX + paddleWidth) {
+                    dy = -dy;
+                    createPaddleParticles(x, canvas.height - paddleHeight);
+                } else {
+                    gameOver();
+                }
             }
 
-            if (rightPressed && paddleX < canvas.width - paddleWidth) {
-                paddleX += 7;
-            }
-            if (leftPressed && paddleX > 0) {
-                paddleX -= 7;
-            }
+            if (rightPressed && paddleX < canvas.width - paddleWidth) paddleX += 7;
+            if (leftPressed && paddleX > 0) paddleX -= 7;
+
             x += dx;
             y += dy;
             requestAnimationFrame(draw);
