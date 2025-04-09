@@ -6,15 +6,18 @@
   <title>Brick Breaker Game</title>
   <style>
     body {
+      margin: 0;
       text-align: center;
       background-image: url("Background2.jpg");
       background-size: cover;
-      color: white;
+      background-repeat: no-repeat;
       font-family: Arial, sans-serif;
+      color: white;
+      overflow: hidden;
     }
     #gameContainer {
+      position: relative;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
       height: 100vh;
@@ -24,7 +27,8 @@
       background: transparent;
     }
     #controls {
-      margin-top: 10px;
+      position: absolute;
+      bottom: 20px;
     }
     button {
       padding: 10px 20px;
@@ -42,12 +46,29 @@
     #startButton:hover {
       background-color: darkgreen;
     }
+    #livesContainer {
+      position: absolute;
+      top: 100px;
+      right: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .heart {
+      width: 40px;
+      height: 40px;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
   <div id="gameContainer">
     <canvas id="myCanvas" width="1000" height="700"></canvas>
+    <div id="livesContainer">
+      <img src="Prenos.png" class="heart" />
+      <img src="Prenos.png" class="heart" />
+      <img src="Prenos.png" class="heart" />
+    </div>
     <div id="controls">
       <button id="startButton">Start Game</button>
     </div>
@@ -58,6 +79,7 @@
     const ctx = canvas.getContext("2d");
 
     let gameStarted = false;
+    let lives = 3;
     let ballRadius = 12;
     let paddleHeight = 15;
     let paddleWidth = 150;
@@ -88,6 +110,13 @@
       color: "#0095DD"
     }];
 
+    const drawHearts = () => {
+      const heartImages = document.querySelectorAll("#livesContainer .heart");
+      heartImages.forEach((heart, index) => {
+        heart.style.visibility = index < lives ? "visible" : "hidden";
+      });
+    };
+
     const getRandomColor = () => "#" + Math.floor(Math.random() * 16777215).toString(16);
 
     const getUniqueBrick = (exclude = []) => {
@@ -102,35 +131,34 @@
     };
 
     function setDifficulty(level) {
-  if (level === "Easy") {
-    brickColumnCount = 6;
-    brickRowCount = 5;
-    brickWidth = 150;
-    brickHeight = 50;
-    ballSpeed = 4;
-  } else if (level === "Medium") {
-    brickColumnCount = 8;
-    brickRowCount = 6;
-    brickWidth = 110;
-    brickHeight = 40;
-    ballSpeed = 6;
-  } else if (level === "Hard") {
-    brickColumnCount = 10;
-    brickRowCount = 7;
-    brickWidth = 90;
-    brickHeight = 30;
-    ballSpeed = 7;
-  }
+      if (level === "Easy") {
+        brickColumnCount = 6;
+        brickRowCount = 5;
+        brickWidth = 150;
+        brickHeight = 50;
+        ballSpeed = 4;
+      } else if (level === "Medium") {
+        brickColumnCount = 8;
+        brickRowCount = 6;
+        brickWidth = 110;
+        brickHeight = 40;
+        ballSpeed = 6;
+      } else if (level === "Hard") {
+        brickColumnCount = 10;
+        brickRowCount = 7;
+        brickWidth = 90;
+        brickHeight = 30;
+        ballSpeed = 7;
+      }
 
-  brickOffsetLeft = brickSideMargin +
-    (canvas.width - 2 * brickSideMargin - (brickColumnCount * (brickWidth + brickPadding) - brickPadding)) / 2;
+      brickOffsetLeft = brickSideMargin +
+        (canvas.width - 2 * brickSideMargin - (brickColumnCount * (brickWidth + brickPadding) - brickPadding)) / 2;
 
-  initializeBricks();
+      initializeBricks();
 
-  // Initialize main ball speed based on difficulty
-  balls[0].dx = ballSpeed;
-  balls[0].dy = -ballSpeed;
-}
+      balls[0].dx = ballSpeed;
+      balls[0].dy = -ballSpeed;
+    }
 
     function initializeBricks() {
       const explosiveBrick = getUniqueBrick();
@@ -267,10 +295,10 @@
           for (let r = 0; r < brickRowCount; r++) {
             const b = bricks[c][r];
             if (b.status === 1 &&
-                ball.x > b.x &&
-                ball.x < b.x + brickWidth &&
-                ball.y > b.y &&
-                ball.y < b.y + brickHeight) {
+              ball.x > b.x &&
+              ball.x < b.x + brickWidth &&
+              ball.y > b.y &&
+              ball.y < b.y + brickHeight) {
 
               ball.dy = -ball.dy;
               ball.color = b.color;
@@ -334,7 +362,7 @@
       gameStarted = false;
       Swal.fire({
         title: "Napaka!",
-        text: "Poskusi spet!",
+        text: "Izgubil si vse življenja!",
         icon: "error",
         confirmButtonText: "Ponovi"
       }).then(() => document.location.reload());
@@ -343,27 +371,43 @@
     function draw() {
       if (!gameStarted) return;
 
-      ctx.fillStyle = "rgba(34, 34, 34, 0.4)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       drawBricks();
       drawParticles();
       drawBalls();
       drawPaddle();
       collisionDetection();
+      drawHearts();
 
       balls.forEach(ball => {
         if (ball.x + ball.dx > canvas.width - ball.radius || ball.x + ball.dx < ball.radius)
           ball.dx = -ball.dx;
-        if (ball.y + ball.dy < ball.radius) ball.dy = -ball.dy;
-        else if (ball.y + ball.dy > canvas.height - ball.radius) {
+        if (ball.y + ball.dy < ball.radius) {
+          ball.dy = -ball.dy;
+        } else if (ball.y + ball.dy > canvas.height - ball.radius) {
           if (ball.x > paddleX && ball.x < paddleX + paddleWidth) {
             ball.dx = 8 * ((ball.x - (paddleX + paddleWidth / 2)) / paddleWidth);
             ball.dy = -ball.dy;
             createPaddleParticles(ball.x, canvas.height - paddleHeight, "#0095DD");
           } else {
             balls = balls.filter(b => b !== ball);
-            if (balls.length === 0) gameOver();
+            if (balls.length === 0) {
+              lives--;
+              drawHearts();
+              if (lives <= 0) {
+                gameOver();
+              } else {
+                balls.push({
+                  x: canvas.width / 2,
+                  y: canvas.height - 40,
+                  dx: ballSpeed,
+                  dy: -ballSpeed,
+                  radius: ballRadius,
+                  color: "#0095DD"
+                });
+              }
+            }
           }
         }
 
@@ -394,7 +438,6 @@
       else if (e.key === "ArrowLeft") leftPressed = false;
     });
 
-    // Show SweetAlert on load
     window.onload = () => {
       Swal.fire({
         title: 'Select Difficulty',
