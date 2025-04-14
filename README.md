@@ -19,10 +19,6 @@ A Zelda-themed Brick Breaker game with special effects, animations, and magical 
 - 🖼️ **Custom Zelda-themed Art** — Includes swords, hearts, and more!
 - 💾 **Fully Client-Side** — No server or external setup needed.
 
-## 📸 Screenshots
-
-> _(Add screenshots here of your gameplay canvas, brick explosions, etc.)_
-
 ## 🔧 How to Run
 
 1. Download or clone this repository.
