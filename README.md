@@ -41,5 +41,3 @@ A Zelda-themed Brick Breaker game with special effects, animations, and magical 
 - [SweetAlert2](https://sweetalert2.github.io/) for modals and dialogs
 - Google Fonts (New Rocker)
 
-## 📂 Project Structure
-
