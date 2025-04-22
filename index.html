@@ -9,7 +9,7 @@
 
     <!-- Zelda-style font -->
     <link href="https://fonts.googleapis.com/css2?family=New+Rocker&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="/images/ikona.png">
+    <link rel="icon" type="image/x-icon" href="./images/ikona.png">
 
     <style>
         body::before {
@@ -19,7 +19,7 @@
             left: 0;
             height: 100%;
             width: 100%;
-            background-image: url('/images/ozadje7.png');
+            background-image: url('./images/ozadje7.png');
             background-size: cover;
             background-repeat: no-repeat;
             filter: blur(2px);
@@ -144,7 +144,7 @@
 
 <body>
     <button id="infoButton" onclick="showInstructions()">
-        <img src="/images/info.png" alt="Instructions" style="width:30px; height:30px;" />
+        <img src="./images/info.png" alt="Instructions" style="width:30px; height:30px;" />
     </button>
     <h1 id="gameTitle">The Bricks of Zelda</h1>
     <div id="gameContainer">
@@ -187,19 +187,19 @@
         let ballSpeed = 4;
         let lastBrickColor = "#0095DD";
 
-        const paddleImage = new Image(); paddleImage.src = "/images/sword.png";
-        const ballImage = new Image(); ballImage.src = "/images/krogla2.png";
+        const paddleImage = new Image(); paddleImage.src = "./images/sword.png";
+        const ballImage = new Image(); ballImage.src = "./images/krogla2.png";
 
-        const goldBrickImage = new Image(); goldBrickImage.src = "/images/zlata.png";
-        const greenBrickImage = new Image(); greenBrickImage.src = "/images/zelena.png";
-        const redBrickImage = new Image(); redBrickImage.src = "/images/red3.png";
-        const purpleBrickImage = new Image(); purpleBrickImage.src = "/images/purple2.png";
-        const silverBrickImage = new Image(); silverBrickImage.src = "/images/silver2.png";
-        const blueBrickImage = new Image(); blueBrickImage.src = "/images/modra.png";
+        const goldBrickImage = new Image(); goldBrickImage.src = "./images/zlata.png";
+        const greenBrickImage = new Image(); greenBrickImage.src = "./images/zelena.png";
+        const redBrickImage = new Image(); redBrickImage.src = "./images/red3.png";
+        const purpleBrickImage = new Image(); purpleBrickImage.src = "./images/purple2.png";
+        const silverBrickImage = new Image(); silverBrickImage.src = "./images/silver2.png";
+        const blueBrickImage = new Image(); blueBrickImage.src = "./images/modra.png";
 
-        const specialRedImage = new Image(); specialRedImage.src = "/images/special_red.png";
-        const specialGreenImage = new Image(); specialGreenImage.src = "/images/special_green.png";
-        const specialBlueImage = new Image(); specialBlueImage.src = "/images/special_blue.png";
+        const specialRedImage = new Image(); specialRedImage.src = "./images/special_red.png";
+        const specialGreenImage = new Image(); specialGreenImage.src = "./images/special_green.png";
+        const specialBlueImage = new Image(); specialBlueImage.src = "./images/special_blue.png";
 
         const allBrickImages = [
             goldBrickImage, greenBrickImage, redBrickImage,
